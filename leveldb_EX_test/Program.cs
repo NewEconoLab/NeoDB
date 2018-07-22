@@ -20,7 +20,7 @@ namespace leveldb_EX_test
             menuacts.Add("3", Test_Map_Get);
 
             menus.Add("4", "Test_Map_Insert");
-            menuacts.Add("3", Test_Map_Insert);
+            menuacts.Add("4", Test_Map_Insert);
         }
         static void Main(string[] args)
         {
@@ -103,6 +103,24 @@ namespace leveldb_EX_test
                 var read = Helper.CreateSnapshot(dbex);
                 var map = table.GetItem(read, new byte[] { 0x01, 0x02 }) as Map;
                 var count = map.Count(dbex,read);
+                Console.WriteLine("map.count=" + count);
+                Console.WriteLine("map.inst=" + Helper.Hex2Str(map.Value));
+            }
+        }
+        static void Test_Map_Insert()
+        {
+            using (var dbex = Helper.OpenDB("c:\\testdb"))
+            {
+                var table = Helper.GetTable(dbex, new byte[] { 0x11, 0x22 });
+                var read = Helper.CreateSnapshot(dbex);
+                var map = table.GetItem(read, new byte[] { 0x01, 0x02 }) as Map;
+
+                var data = new byte[8];
+                Random r = new Random();
+                r.NextBytes(data);
+                var bytes = new Bytes(data);
+                map.SetItem(dbex, new byte[] { 0x01 }, bytes);
+                var count = map.Count(dbex, read);
                 Console.WriteLine("map.count=" + count);
                 Console.WriteLine("map.inst=" + Helper.Hex2Str(map.Value));
             }
