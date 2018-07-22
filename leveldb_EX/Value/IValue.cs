@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace LevelDB.Ex
 {
-    public interface IItem
+    public interface IValue
     {
         Value_DataType type
         {
@@ -14,7 +15,20 @@ namespace LevelDB.Ex
         {
             get;
         }
-        void Put(LevelDB.DB db,byte[] key);
-        void Batch_Put(LevelDB.WriteBatch batch, LevelDB.DB db, byte[] key);
+    }
+ 
+    public interface IMap : IValue
+    {
+        UInt64 Count(LevelDB.ReadOptions snapshot);
+        IValue GetItem(LevelDB.ReadOptions snapshot, byte[] key);
+        void SetItem(byte[] key, IValue item);
+        void Batch_SetItem(LevelDB.WriteBatch batch, byte[] key, IValue item);
+        MapIterator GetIterator(LevelDB.ReadOptions snapshot);
+    }
+    public interface IValueCreator
+    {
+        void Init(LevelDB.DB db, byte[] data);
+        void PutToDB(LevelDB.DB db, byte[] key);
+        void Batch_PutToDB(LevelDB.WriteBatch batch, LevelDB.DB db, byte[] key);
     }
 }

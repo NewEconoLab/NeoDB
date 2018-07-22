@@ -50,7 +50,7 @@ namespace LevelDB
     /// If two threads share such an object, they must protect access to it
     /// using their own locking protocol.
     /// </remarks>
-    public class DB : IDisposable, IEnumerable<KeyValuePair<string, string>>
+    public class DB : IDisposable, IEnumerable<KeyValuePair<byte[], byte[]>>
     {
         /// <summary>
         /// Native handle
@@ -235,7 +235,7 @@ namespace LevelDB
             return GetEnumerator();
         }
 
-        public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+        public IEnumerator<KeyValuePair<byte[], byte[]>> GetEnumerator()
         {
             CheckDisposed();
             return new Iterator(this, null);

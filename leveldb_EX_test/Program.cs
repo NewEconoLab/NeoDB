@@ -1,7 +1,7 @@
 ﻿using LevelDB.Ex;
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 namespace leveldb_EX_test
 {
     class Program
@@ -46,7 +46,7 @@ namespace leveldb_EX_test
         }
         static void Show_Menu()
         {
-            foreach(var m in menus)
+            foreach (var m in menus)
             {
                 Console.WriteLine(m.Key + ":" + m.Value);
             }
@@ -100,11 +100,24 @@ namespace leveldb_EX_test
             using (var dbex = Helper.OpenDB("c:\\testdb"))
             {
                 var table = Helper.GetTable(dbex, new byte[] { 0x11, 0x22 });
-                var read = Helper.CreateSnapshot(dbex);
-                var map = table.GetItem(read, new byte[] { 0x01, 0x02 }) as Map;
-                var count = map.Count(dbex,read);
+                var snapshot = Helper.CreateSnapshot(dbex);
+                var map = table.GetItem(snapshot, new byte[] { 0x01, 0x02 }) as Map;
+                var count = map.Count(snapshot);
                 Console.WriteLine("map.count=" + count);
                 Console.WriteLine("map.inst=" + Helper.Hex2Str(map.Value));
+
+                var it = map.GetIterator(snapshot);
+                byte[] head = map.GetBeginSeek();
+                Console.WriteLine("head=" + Helper.Hex2Str(head));
+
+
+                while (it.IsVaild)
+                {
+                    byte[] key = it.Key;
+                    var value = it.Value;
+                    it.Next();
+                    Console.WriteLine(Helper.Hex2Str(key) + "-->(" + value.type + ")" + Helper.Hex2Str(value.Value));
+                }
             }
         }
         static void Test_Map_Insert()
@@ -119,8 +132,8 @@ namespace leveldb_EX_test
                 Random r = new Random();
                 r.NextBytes(data);
                 var bytes = new Bytes(data);
-                map.SetItem(dbex, new byte[] { 0x01 }, bytes);
-                var count = map.Count(dbex, read);
+                map.SetItem(new byte[] { 0x0a }, bytes);
+                var count = map.Count(read);
                 Console.WriteLine("map.count=" + count);
                 Console.WriteLine("map.inst=" + Helper.Hex2Str(map.Value));
             }

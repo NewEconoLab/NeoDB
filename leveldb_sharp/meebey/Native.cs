@@ -675,13 +675,19 @@ namespace LevelDB
 
         // extern void leveldb_iter_seek(leveldb_iterator_t*, const char* k, size_t klen);
         [DllImport("leveldb", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void leveldb_iter_seek(IntPtr iter, byte[] key, UIntPtr keyLength);
+        public static void leveldb_iter_seek(IntPtr iter, byte[] key)
+        {
+            var keyLength = GetBytesLength(key);
+            leveldb_iter_seek(iter, key, keyLength);
+        }
+        [DllImport("leveldb", CallingConvention = CallingConvention.Cdecl)]
         public static extern void leveldb_iter_seek(IntPtr iter, string key, UIntPtr keyLength);
         public static void leveldb_iter_seek(IntPtr iter, string key)
         {
             var keyLength = GetStringLength(key);
             leveldb_iter_seek(iter, key, keyLength);
         }
-
         // extern unsigned char leveldb_iter_valid(const leveldb_iterator_t*);
         [DllImport("leveldb", EntryPoint="leveldb_iter_valid", CallingConvention = CallingConvention.Cdecl)]
         public static extern byte leveldb_iter_valid_native(IntPtr iter);
@@ -711,7 +717,18 @@ namespace LevelDB
             var key = Marshal.PtrToStringAnsi(keyPtr, (int) keyLength);
             return key;
         }
-
+        public static byte[] leveldb_iter_key_bytes(IntPtr iter)
+        {
+            UIntPtr keyLength;
+            var keyPtr = leveldb_iter_key(iter, out keyLength);
+            if (keyPtr == IntPtr.Zero || keyLength == UIntPtr.Zero) {
+                return null;
+            }
+            var buffer = new byte[(int)keyLength];
+            Marshal.Copy(keyPtr, buffer, 0, (int)keyLength);
+            //leveldb_free(keyPtr);
+            return buffer;
+        }
         // extern const char* leveldb_iter_value(const leveldb_iterator_t*, size_t* vlen);
         [DllImport("leveldb", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr leveldb_iter_value(IntPtr iter, out UIntPtr valueLength);
@@ -725,7 +742,18 @@ namespace LevelDB
             var value = Marshal.PtrToStringAnsi(valuePtr, (int) valueLength);
             return value;
         }
-
+        public static byte[] leveldb_iter_value_bytes(IntPtr iter)
+        {
+            UIntPtr valueLength;
+            var valuePtr = leveldb_iter_value(iter, out valueLength);
+            if (valuePtr == IntPtr.Zero || valueLength == UIntPtr.Zero) {
+                return null;
+            }
+            var buffer = new byte[(int)valueLength];
+            Marshal.Copy(valuePtr, buffer, 0, (int)valueLength);
+            //leveldb_free(valuePtr);
+            return buffer;
+        }
         // extern void leveldb_iter_destroy(leveldb_iterator_t*);
         [DllImport("leveldb", CallingConvention = CallingConvention.Cdecl)]
         public static extern void leveldb_iter_destroy(IntPtr iter);

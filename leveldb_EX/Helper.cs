@@ -15,7 +15,7 @@ namespace LevelDB.Ex
         //0x13+InstanceID+Key
 
         InstanceMax = 0x20,//所有的引用对象池，随机分配，64bit,不会给重复的
-                   //一个map是一个Instance，使用这个机制是为了方便DeleteMap或者RenameMap
+                           //一个map是一个Instance，使用这个机制是为了方便DeleteMap或者RenameMap
 
     }
 
@@ -25,6 +25,37 @@ namespace LevelDB.Ex
     /// </summary>
     public class Helper
     {
+        public static readonly byte[] tagZero = new byte[] { 0x00 };
+        public static readonly byte[] tagKey_Item = new byte[] { (byte)Key_DataType.ItemData };
+        public static readonly byte[] tagKey_MapCount = new byte[] { (byte)Key_DataType.Map_Count };
+        public static readonly byte[] tagKey_MapValues = new byte[] { (byte)Key_DataType.Map_Values };
+        public static readonly byte[] tagKey_InstanceMax = new byte[] { (byte)Key_DataType.InstanceMax };
+
+        public static readonly byte[] tagValue_Bytes = new byte[] { (byte)Value_DataType.Bytes };
+        public static readonly byte[] tagValue_Map = new byte[] { (byte)Value_DataType.Map };
+
+        public static IValue CreateValue(LevelDB.DB db,  byte[] data)
+        {
+
+            if (data == null || data.Length == 0)
+                return null;
+            IValue value = null;
+            if (data[0] == (byte)Value_DataType.Bytes)
+            {
+                value = new Bytes();
+            }
+            if (data[0] == (byte)Value_DataType.Map)
+            {
+                value = new Map();
+            }
+            if(value==null)
+            {
+                throw new Exception("unknown datatype.");
+            }
+            (value as IValueCreator).Init(db, data);
+            return value;
+
+        }
         public static LevelDB.DB OpenDB(string path)
         {
             var op = new LevelDB.Options() { CreateIfMissing = true, Compression = LevelDB.CompressionType.SnappyCompression };
