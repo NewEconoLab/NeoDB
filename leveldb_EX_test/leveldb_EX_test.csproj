@@ -1,13 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <ApplicationIcon />
-    <StartupObject />
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\leveldb_EX\leveldb_EX.csproj" />
     <ProjectReference Include="..\leveldb_sharp\leveldb_sharp.csproj" />
   </ItemGroup>
 
